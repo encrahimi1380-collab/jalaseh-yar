@@ -1,10 +1,12 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>جلسه‌یار</title>
   <link rel="stylesheet" href="style.css">
+  <!-- کتابخانه خواندن اکسل -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <header>
@@ -13,7 +15,7 @@
   </header>
 
   <section class="panel">
-    <h2>افزودن جلسه</h2>
+    <h2>افزودن جلسه (دستی)</h2>
     <input id="title" placeholder="عنوان جلسه" />
     <input id="address" placeholder="آدرس (مثلاً: ونک، خیابان..." />
     <div class="days">
@@ -24,7 +26,17 @@
       <label><input type="checkbox" value="4"> چهارشنبه</label>
       <label><input type="checkbox" value="5"> پنجشنبه</label>
     </div>
-    <button id="addBtn">➕ افزودن</button>
+    <button id="addBtn">➕ افزودن دستی</button>
+  </section>
+
+  <!-- بخش جدید: آپلود اکسل -->
+  <section class="panel">
+    <h2>آپلود فایل اکسل (Excel/CSV)</h2>
+    <p style="font-size: 13px; color: #64748b;">
+      ستون‌های فایل شما باید به این ترتیب باشد: <br>
+      <b>عنوان</b> | <b>آدرس</b> | <b>روزها</b> (مثلاً: شنبه,دوشنبه)
+    </p>
+    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="padding: 10px; border: 1px dashed #cbd5e1;" />
   </section>
 
   <section class="panel">
