@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جلسه‌یار</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>📅 جلسه‌یار</h1>
+    <p>برنامه هفتگی هوشمند بر اساس نزدیکی آدرس‌ها</p>
+  </header>
+
+  <section class="panel">
+    <h2>افزودن جلسه</h2>
+    <input id="title" placeholder="عنوان جلسه" />
+    <input id="address" placeholder="آدرس (مثلاً: ونک، خیابان..." />
+    <div class="days">
+      <label><input type="checkbox" value="0"> شنبه</label>
+      <label><input type="checkbox" value="1"> یکشنبه</label>
+      <label><input type="checkbox" value="2"> دوشنبه</label>
+      <label><input type="checkbox" value="3"> سه‌شنبه</label>
+      <label><input type="checkbox" value="4"> چهارشنبه</label>
+      <label><input type="checkbox" value="5"> پنجشنبه</label>
+    </div>
+    <button id="addBtn">➕ افزودن</button>
+  </section>
+
+  <section class="panel">
+    <h2>جلسات وارد شده</h2>
+    <ul id="meetingList"></ul>
+    <button id="planBtn" class="primary">🚀 ساخت برنامه هفتگی</button>
+  </section>
+
+  <section class="panel" id="resultPanel" style="display:none">
+    <h2>برنامه هفتگی</h2>
+    <div id="schedule"></div>
+    <button onclick="window.print()">🖨️ چاپ / PDF</button>
+  </section>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
