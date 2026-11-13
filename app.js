@@ -1,6 +1,7 @@
 let meetings = [];
 const DAY_NAMES = ["شنبه","یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه"];
 
+// ============ Geocoding با Neshan ============
 async function geocode(address) {
   const url = `https://api.neshan.org/v4/geocoding?address=${encodeURIComponent(address)}`;
   const res = await fetch(url, { headers: { "Api-Key": CONFIG.NESHAN_API_KEY } });
@@ -25,6 +26,7 @@ function travelMinutes(km) {
   return Math.max(10, Math.round(km / 25 * 60));
 }
 
+// ============ افزودن دستی ============
 document.getElementById("addBtn").onclick = async () => {
   const title = document.getElementById("title").value.trim();
   const address = document.getElementById("address").value.trim();
@@ -33,18 +35,66 @@ document.getElementById("addBtn").onclick = async () => {
     alert("عنوان، آدرس و حداقل یک روز را پر کن.");
     return;
   }
-  try {
-    const coords = await geocode(address);
-    meetings.push({ id: Date.now(), title, address, days, lat: coords.lat, lng: coords.lng });
-    document.getElementById("title").value = "";
-    document.getElementById("address").value = "";
-    document.querySelectorAll(".days input").forEach(c => c.checked = false);
-    renderList();
-  } catch (e) {
-    alert(e.message);
-  }
+  await addMeeting(title, address, days);
+  document.getElementById("title").value = "";
+  document.getElementById("address").value = "";
+  document.querySelectorAll(".days input").forEach(c => c.checked = false);
 };
 
+// تابع مشترک برای اضافه کردن (هم دستی هم اکسل)
+async function addMeeting(title, address, days) {
+  try {
+    const coords = await geocode(address);
+    meetings.push({ id: Date.now() + Math.random(), title, address, days, lat: coords.lat, lng: coords.lng });
+    renderList();
+  } catch (e) {
+    alert("خطا در جلسه: " + title + "\n" + e.message);
+  }
+}
+
+// ============ آپلود و خواندن اکسل ============
+document.getElementById("excelFile").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type: 'array'});
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet);
+    
+    if(json.length === 0) return alert("فایل خالی است!");
+    
+    alert(`در حال خواندن ${json.length} جلسه از فایل... لطفاً صبر کنید.`);
+    
+    for (let row of json) {
+      // فرض بر این است که ستون‌ها نام فارسی دارند: عنوان، آدرس، روزها
+      const title = row["عنوان"] || row["Title"] || row["name"];
+      const address = row["آدرس"] || row["Address"] || row["location"];
+      const daysStr = row["روزها"] || row["Days"] || row["days"] || "";
+      
+      if(!title || !address) continue;
+      
+      // تبدیل روزها (مثلا "شنبه,دوشنبه" به آرایه [0,2])
+      let daysArr = [];
+      const dayMap = {"شنبه":0, "یکشنبه":1, "دوشنبه":2, "سه‌شنبه":3, "سه شنبه":3, "چهارشنبه":4, "پنجشنبه":5, "پنج شنبه":5};
+      String(daysStr).split(/[,، ]+/).forEach(d => {
+        if (dayMap[d] !== undefined) daysArr.push(dayMap[d]);
+      });
+      
+      if (daysArr.length === 0) daysArr = [0,1,2,3,4,5]; // اگر روزی مشخص نشده بود، همه روزها
+      
+      await addMeeting(title, address, daysArr);
+    }
+    alert("تمام جلسات اکسل اضافه شدند!");
+    e.target.value = ""; // ریست کردن اینپوت
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+// ============ نمایش لیست ============
 function renderList() {
   const ul = document.getElementById("meetingList");
   ul.innerHTML = "";
@@ -61,6 +111,7 @@ function removeMeeting(id) {
   renderList();
 }
 
+// ============ ساخت برنامه ============
 document.getElementById("planBtn").onclick = () => {
   if (meetings.length === 0) return alert("اول جلسه اضافه کن.");
   renderSchedule(buildSchedule(meetings));
